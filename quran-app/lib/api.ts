@@ -72,9 +72,22 @@ export async function getSurahWithTranslation(surahId: number): Promise<{
 
 export async function searchAyahs(query: string, limit = 20): Promise<any[]> {
     try {
-        const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}&language=en&limit=${limit}`);
+        const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}&limit=${limit}`);
         const data = await response.json();
-        return data.data?.results || [];
+
+        // Handle different response structures from the API
+        if (data.data && Array.isArray(data.data)) {
+            return data.data;
+        }
+        if (data.data?.matches && Array.isArray(data.data.matches)) {
+            return data.data.matches;
+        }
+        if (data.data?.results && Array.isArray(data.data.results)) {
+            return data.data.results;
+        }
+
+        console.log('Search response:', data);
+        return [];
     } catch (error) {
         console.error('Failed to search ayahs:', error);
         return [];
